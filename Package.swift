@@ -5,6 +5,15 @@ import PackageDescription
 
 let package = Package(
     name: "swift-hal",
+    // TODO: Should work on linux and windows and freebsd and embedded
+    platforms: [
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6),
+        .macCatalyst(.v13),
+        .visionOS(.v1),
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -26,13 +35,15 @@ let package = Package(
         .target(
             name: "RaspberryPi4HAL",
             dependencies: [
-                .product(name: "MMIO", package: "swift-mmio")
+                "HAL",
+                .product(name: "MMIO", package: "swift-mmio"),
             ]
         ),
         .target(
             name: "RaspberryPiPicoHAL",
             dependencies: [
-                .product(name: "MMIO", package: "swift-mmio")
+                .product(name: "MMIO", package: "swift-mmio"),
+                "HAL"
             ]
         )
     ]

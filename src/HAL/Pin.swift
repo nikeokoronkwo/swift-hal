@@ -1,9 +1,27 @@
+public protocol IOBase {
+    func on() throws
+    func off() throws
+}
+
+public protocol PinBase: IOBase {
+    var mode: Pin.Mode { get }
+    
+    var value: Bool { get throws }
+}
+
+public protocol PinSetBase: IOBase {
+    associatedtype P: PinBase
+    
+    var values: [Bool?] { get throws }
+    subscript(index: Int) -> P? { get }
+}
+
 /// An I/O Pin
 ///
 /// An I/O Pin is a peripheral device with which digital signals can be written and read to
 ///
 /// Most pins are exclusively either used for input (reading data/signals) or output (writing data/signals). However, because architectures may differ, we do not assert that pins may be one or the other.
-struct Pin {
+public struct Pin: PinBase {
     unowned fileprivate let hal: IOCapable
     
     /// The memory mapped address where the given pin is located
@@ -13,7 +31,7 @@ struct Pin {
     /// The type of pin present (input or output)
     ///
     /// For more information about pin modes, see ``Pin.Mode``
-    let mode: Pin.Mode
+    public let mode: Pin.Mode
 
     init(_ hal: IOCapable, address: UInt, mode: Pin.Mode = .inputOutput) throws {
         self.hal = hal
@@ -24,7 +42,7 @@ struct Pin {
     }
 
     /// Sets a pin's output to high (value 1)
-    func on() throws {
+    public func on() throws {
         guard mode.isOutput else {
             throw Pin.Error.wrongMode(mode, expected: .output)
         }
@@ -32,7 +50,7 @@ struct Pin {
     }
 
     /// Sets a pin's output to low (value 0)
-    func off() throws {
+    public func off() throws {
         guard mode.isOutput else {
             throw Pin.Error.wrongMode(mode, expected: .output)
         }
@@ -40,7 +58,7 @@ struct Pin {
     }
 
     /// Get the value of an input
-    var value: Bool {
+    public var value: Bool {
         get throws {
             guard mode.isInput else {
                 throw Pin.Error.wrongMode(mode, expected: .input)
@@ -51,7 +69,32 @@ struct Pin {
 }
 
 /// A set of pins, which can be used to work on pin I/O operations on multiple I/O points at the same time, without having to manage each individual pin
-struct PinSet {
+public struct PinSet: PinSetBase {
+    public var values: [Bool?] {
+        get throws {
+            try addressMap.map { (address: UInt, mode: Pin.Mode) in
+                guard mode.isInput else {
+                    return nil
+                }
+                return try hal.read(at: address)
+            }
+        }
+    }
+    
+    public func on() throws {
+        try addressMap.forEach { (addr: UInt, mode: Pin.Mode) in
+            guard mode.isOutput else { return }
+            try hal.write(at: addr, value: true)
+        }
+    }
+    
+    public func off() throws {
+        try addressMap.forEach { (addr: UInt, mode: Pin.Mode) in
+            guard mode.isOutput else { return }
+            try hal.write(at: addr, value: false)
+        }
+    }
+    
     unowned fileprivate let hal: IOCapable
     
     /// The set of addresses referred to by the given pin set
@@ -72,7 +115,8 @@ struct PinSet {
         }))
     }
     
-    subscript(address: UInt) -> Pin? {
+    public subscript(index: Int) -> Pin? {
+        let address = Array(addressMap.keys)[index]
         return try? self.pin(at: address)
     }
     
@@ -96,7 +140,7 @@ extension Pin {
         self.mode = mode
     }
     
-    enum Mode {
+    public enum Mode: Sendable {
         case input
         case output
         case inputOutput
@@ -120,7 +164,7 @@ extension Pin {
         }
     }
     
-    enum Error {
+    public enum Error {
         case wrongMode(Mode, expected: Mode)
     }
 }

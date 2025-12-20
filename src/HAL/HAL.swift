@@ -2,7 +2,7 @@
 
 /// # The Hardware Abstraction Layer
 /// A HAL (Hardware Abstraction Layer) is an interface that separates hardware-specific software code (like memory mapping)
-class HAL {
+open class HAL {
     /// The device identifier
     let id: StaticString
 
@@ -19,7 +19,7 @@ class HAL {
 /// A HAL capability defines a set of extensions that can allow a base HAL to be able to access
 /// and work with certain drivers and peripherals, including IO interfaces, bluetooth, WiFi, Clock,
 /// 
-protocol HALCapability: HAL {}
+public protocol HALCapability: HAL {}
 
 /// A HAL Capability that adds the ability to be able to read and write from external I/O (input/output) interfaces
 /// 
@@ -31,7 +31,7 @@ protocol HALCapability: HAL {}
 /// > For most of the interfaces described here, when dealing with boolean values, unless specified, `true` represents a high value (1), while `false` represents a low value (0).
 ///
 /// For certain workflows, functions are available to configure, read and write to given pins at once. For most workflows, it is recommended to use ``withPin`` (if you plan on using the pin only once), or just `.pin` to get a `Pin` object which can be used in different device scenarios
-protocol IOCapable: HALCapability {
+public protocol IOCapable: HALCapability {
     /// Reads data available at a given pin. Returns a ``Bool`` representing the given value
     func read(at: UInt) throws -> Bool
 
