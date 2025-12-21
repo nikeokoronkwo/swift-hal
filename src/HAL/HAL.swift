@@ -14,6 +14,12 @@ open class HAL {
     }
 }
 
+public enum HALError: Error {
+    case unknownAddress(String, addr: UInt)
+    case unknown(String)
+    case unsupported(String)
+}
+
 /// A base protocol for defining HAL capabilities that can be used to augment the base HAL interface.
 ///
 /// A HAL capability defines a set of extensions that can allow a base HAL to be able to access

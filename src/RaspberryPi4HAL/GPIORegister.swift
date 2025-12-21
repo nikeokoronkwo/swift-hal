@@ -13,8 +13,23 @@
 
 
 import MMIO
+import struct HAL.BitSet
+import struct HAL.FixedBitSet
 
 let GPIO_BASE_ADDRESS: UInt = BASE_ADDRESS + 0x20_0000
+
+extension BitSet: BitFieldProjectable {
+    public static var bitWidth: Int {
+        MemoryLayout<BitSet>.size * 8
+    }
+}
+
+@available(macOS 26.0.0, *)
+extension FixedBitSet: BitFieldProjectable {
+    public static var bitWidth: Int {
+        count
+    }
+}
 
 @RegisterBlock
 struct GPIO {
@@ -53,6 +68,46 @@ struct GPIO {
     
     @RegisterBlock(offset: 0x38)
     var gplev1: Register<GPLEV1>
+}
+
+@RegisterBlock
+@available(macOS 26.0.0, *)
+struct GPIO_26 {
+    @RegisterBlock(offset: 0x00)
+    var gpfsel0: Register<GPFSEL0>
+    
+    @RegisterBlock(offset: 0x04)
+    var gpfsel1: Register<GPFSEL1>
+    
+    @RegisterBlock(offset: 0x08)
+    var gpfsel2: Register<GPFSEL2>
+    
+    @RegisterBlock(offset: 0x0c)
+    var gpfsel3: Register<GPFSEL3>
+    
+    @RegisterBlock(offset: 0x10)
+    var gpfsel4: Register<GPFSEL4>
+    
+    @RegisterBlock(offset: 0x14)
+    var gpfsel5: Register<GPFSEL5>
+    
+    @RegisterBlock(offset: 0x1c)
+    var gpset0: Register<GPSET0_26>
+    
+    @RegisterBlock(offset: 0x20)
+    var gpset1: Register<GPSET1_26>
+    
+    @RegisterBlock(offset: 0x28)
+    var gpclr0: Register<GPCLR0_26>
+    
+    @RegisterBlock(offset: 0x2c)
+    var gpclr1: Register<GPCLR1_26>
+    
+    @RegisterBlock(offset: 0x34)
+    var gplev0: Register<GPLEV0_26>
+    
+    @RegisterBlock(offset: 0x38)
+    var gplev1: Register<GPLEV1_26>
 }
 
 @Register(bitWidth: 32)
@@ -347,6 +402,13 @@ struct GPSET0 {
 }
 
 @Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPSET0_26 {
+    @WriteOnly(bits: 0..<32, as: FixedBitSet<32>.self)
+    var set0: SET
+}
+
+@Register(bitWidth: 32)
 struct GPSET1 {
     @WriteOnly(bits: 0..<1, as: Bool.self)
     var set32: SET32
@@ -425,6 +487,13 @@ struct GPSET1 {
     
     @WriteOnly(bits: 25..<26, as: Bool.self)
     var set57: SET57
+}
+
+@Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPSET1_26 {
+    @WriteOnly(bits: 0..<26, as: FixedBitSet<26>.self)
+    var set1: SET1
 }
 
 @Register(bitWidth: 32)
@@ -527,6 +596,13 @@ struct GPCLR0 {
 }
 
 @Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPCLR0_26 {
+    @WriteOnly(bits: 0..<32, as: FixedBitSet<32>.self)
+    var clr0: CLR0
+}
+
+@Register(bitWidth: 32)
 struct GPCLR1 {
     @WriteOnly(bits: 0..<1, as: Bool.self)
     var clr32: CLR32
@@ -605,6 +681,13 @@ struct GPCLR1 {
     
     @WriteOnly(bits: 25..<26, as: Bool.self)
     var clr57: CLR57
+}
+
+@Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPCLR1_26 {
+    @WriteOnly(bits: 0..<26, as: FixedBitSet<26>.self)
+    var clr1: CLR1
 }
 
 @Register(bitWidth: 32)
@@ -707,6 +790,13 @@ struct GPLEV0 {
 }
 
 @Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPLEV0_26 {
+    @ReadOnly(bits: 0..<32, as: FixedBitSet<32>.self)
+    var lev0: LEV0
+}
+
+@Register(bitWidth: 32)
 struct GPLEV1 {
     @ReadOnly(bits: 0..<1, as: Bool.self)
     var lev32: LEV32
@@ -787,4 +877,15 @@ struct GPLEV1 {
     var lev57: LEV57
 }
 
+@Register(bitWidth: 32)
+@available(macOS 26.0.0, *)
+struct GPLEV1_26 {
+    @ReadOnly(bits: 0..<26, as: FixedBitSet<26>.self)
+    var lev1: LEV1
+}
+
+
 let gpio = GPIO(unsafeAddress: GPIO_BASE_ADDRESS)
+
+@available(macOS 26.0.0, *)
+let gpio_26 = GPIO_26(unsafeAddress: GPIO_BASE_ADDRESS)
