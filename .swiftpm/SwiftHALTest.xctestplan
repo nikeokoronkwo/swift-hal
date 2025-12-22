@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "610F6BE7-8720-42CB-9F52-AAA997D5187D",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "HALTests",
+        "name" : "HALTests"
+      }
+    }
+  ],
+  "version" : 1
+}

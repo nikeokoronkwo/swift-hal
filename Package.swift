@@ -25,6 +25,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-mmio", .upToNextMajor(from: "0.1.1")),
+        .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(from: "1.3.0")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -32,11 +33,18 @@ let package = Package(
         .target(
             name: "HAL"
         ),
+        .testTarget(
+            name: "HALTests",
+            dependencies: [
+                "HAL"
+            ]
+        ),
         .target(
             name: "RaspberryPi4HAL",
             dependencies: [
                 "HAL",
                 .product(name: "MMIO", package: "swift-mmio"),
+                .product(name: "Collections", package: "swift-collections"),
             ]
         ),
         .target(
@@ -45,6 +53,6 @@ let package = Package(
                 .product(name: "MMIO", package: "swift-mmio"),
                 "HAL"
             ]
-        )
+        ),
     ]
 )

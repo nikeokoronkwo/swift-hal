@@ -13,16 +13,10 @@
 
 
 import MMIO
-import struct HAL.BitSet
+import struct Collections.BitArray
 import struct HAL.FixedBitSet
 
 let GPIO_BASE_ADDRESS: UInt = BASE_ADDRESS + 0x20_0000
-
-extension BitSet: BitFieldProjectable {
-    public static var bitWidth: Int {
-        MemoryLayout<BitSet>.size * 8
-    }
-}
 
 @available(macOS 26.0.0, *)
 extension FixedBitSet: BitFieldProjectable {

@@ -127,169 +127,6 @@ public extension BitSetProtocol {
     }
 }
 
-/// A view of individual bits in a given unsigned integer
-///
-/// A bitset is meant to represent a set of bits, usually for a given number. It allows users to have a view of individual bits in a given number in order to manipulate them in a safe, easy way. The implementation of a bitset here is meant to be similar to `std::bitset` in C++, but making use of Swift semantics and without the dependency on `bitset.h`.
-@frozen
-public struct BitSet {
-    public var base: UInt
-
-    public init() {
-        self.base = UInt()
-    }
-
-    public init(_ int: UInt?) {
-        guard let num = int else {
-            self.base = UInt()
-            return
-        }
-        self.base = num
-    }
-}
-
-// Conformance to BitSetProtocol
-extension BitSet: BitSetProtocol {
-    public var value: UInt {
-        get {
-            base
-        }
-        set {
-            base = newValue
-        }
-    }
-    
-    /// Get access to get/set individual bits in the given bitset
-    public subscript(_ index: Int) -> UInt8 {
-        get {
-            guard index >= 0 && index < base.bitWidth else {
-                return 0
-            }
-
-            return ((base >> index) & 1) == 1 ? 1 : 0
-        }
-        set {
-            guard index >= 0 && index < base.bitWidth else {
-                return
-            }
-            if newValue == 1 {
-                base |= (1 << index)
-            } else {
-                base &= ~(1 << index)
-            }
-        }
-    }
-
-    /// Checks if all the bits in the given bit set are set to `true`
-    ///
-    /// ```swift
-    /// let a = 0b1111
-    /// let b = 0b1010
-    /// BitSet(a).all() // true
-    /// BitSet(b).all() // false
-    /// ```
-    public func all() -> Bool {
-        let mask: UInt = (1 << base.bitWidth) - 1
-        return (base & mask) == mask
-    }
-
-    /// Checks if any of the bits in the given bit set are set to `true`.
-    ///
-    /// This is the opposite of ``none()``, which checks if all of the bits are set to `false`
-    public func any() -> Bool {
-        return base != 0
-    }
-
-    /// Checks if all the bits in the given bit set are set to `false`
-    public func none() -> Bool {
-        return base == 0
-    }
-
-    /// Returns the number of bits present in the given bit set which are `true`
-    public var nonzeroBitCount: Int {
-        base.nonzeroBitCount
-    }
-
-    /// Returns the number of bits present in the given bit set, which is equal to the bit width of the underlying unsigned integer
-    public var count: Int {
-        return base.bitWidth
-    }
-    
-    public func get(_ pos: Int) throws -> UInt8 {
-        guard pos >= 0 && pos < base.bitWidth else {
-            throw BitSetError.outOfBounds
-        }
-        return self[pos]
-    }
- 
-    /// Sets the bit at the given position `pos` to the value `value`.
-    ///
-    /// This has the same effect as ``subscript(_:)``
-    public mutating func set(_ pos: Int, _ value: UInt8) throws {
-        guard pos >= 0 && pos < base.bitWidth else {
-            throw BitSetError.outOfBounds
-        }
-
-        self[pos] = value
-    }
-
-    /// Sets all the bits in the given bitset to `true`
-    public mutating func set() {
-        base = (1 << base.bitWidth) - 1
-    }
-
-    /// Sets all the bits at the given positions to the value of `value`.
-    ///
-    /// This is useful when wanting to set multiple bits at a given time, rather than looping over ``set(_:_:)``
-    public mutating func setAll(_ value: UInt8, at positions: [Int]) {
-        let mask: UInt = positions.reduce(0) { partialResult, pos in
-            partialResult + (1 << pos)
-        }
-
-        if value == 1 {
-            base |= mask
-        } else {
-            base &= ~mask
-        }
-    }
-
-    /// Resets the bit in the given position `pos` (sets the bit to `false`)
-    public mutating func reset(_ pos: Int) throws {
-        guard pos >= 0 && pos < base.bitWidth else {
-            throw BitSetError.outOfBounds
-        }
-        self[pos] = 0
-    }
-
-    /// Resets all the bits in the given bit set (sets the bits to `false`)
-    public mutating func reset() {
-        base = 0
-    }
-
-    /// Resets all the bits at the given positions to the value of `value`
-    ///
-    /// This is useful when wanting to set multiple bits at a given time, rather than looping over ``reset(_:)``
-    public mutating func resetAll(at positions: [Int]) {
-        let mask: UInt = positions.reduce(0) { partialResult, pos in
-            partialResult + (1 << pos)
-        }
-
-        base &= ~mask
-    }
-
-    /// Flips or toggles the bit in the given position
-    public mutating func flip(_ pos: Int) throws {
-        guard pos >= 0 && pos < base.bitWidth else {
-            throw BitSetError.outOfBounds
-        }
-        self[pos] = ~self[pos]
-    }
-
-    /// Flips or toggles all the bits in the given integer
-    public mutating func flip() {
-        base = ~base
-    }
-}
-
 /// A fixed view of individual bits in a given unsigned integer
 ///
 /// A bitset is meant to represent a set of bits, usually for a given number. It allows users to have a view of individual bits in a given number in order to manipulate them in a safe, easy way. The implementation of a bitset here is meant to be similar to `std::bitset` in C++, but making use of Swift semantics and without the dependency on `bitset.h`.
@@ -318,6 +155,14 @@ extension FixedBitSet {
                 self.base[i] = rawBuffer[i]
             }
         }
+    }
+    
+    public init(_ int: Int?) {
+        self.init(int == nil ? nil : UInt(int!))
+    }
+    
+    public init(repeating: UInt8) {
+        self.base = InlineArray<count, UInt8>(repeating: repeating)
     }
 }
 
