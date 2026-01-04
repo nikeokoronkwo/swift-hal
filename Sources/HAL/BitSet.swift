@@ -47,7 +47,7 @@ public protocol BitSetProtocol: ExpressibleByIntegerLiteral, RawRepresentable, C
     mutating func set()
     
     /// Sets all bits at the given positions to `value` (0 or 1).
-    mutating func setAll(_ value: UInt8, at positions: [Int])
+    mutating func setAll(_ value: UInt8, at positions: [Int]) throws
     
     /// Resets (sets to `0`) the bit at the given position.
     mutating func reset(_ pos: Int) throws
@@ -233,6 +233,15 @@ extension FixedBitSet: BitSetProtocol {
         return base[pos]
     }
     
+    public func getAll(at positions: [Int]) throws -> [UInt8] {
+        return try positions.map { pos in
+            guard pos >= 0 && pos < base.count else {
+                throw BitSetError.outOfBounds
+            }
+            return base[pos]
+        }
+    }
+    
     public mutating func set(_ pos: Int, _ value: UInt8) throws {
         guard pos >= 0 && pos < base.count else {
             throw BitSetError.outOfBounds
@@ -246,8 +255,11 @@ extension FixedBitSet: BitSetProtocol {
         }
     }
     
-    public mutating func setAll(_ value: UInt8, at positions: [Int]) {
-        positions.forEach { p in
+    public mutating func setAll(_ value: UInt8, at positions: [Int]) throws {
+        try positions.forEach { p in
+            guard p >= 0 && p < base.count else {
+                throw BitSetError.outOfBounds
+            }
             base[p] = value
         }
     }

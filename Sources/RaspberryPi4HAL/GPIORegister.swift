@@ -13,9 +13,9 @@
 
 
 import MMIO
-import struct Collections.BitArray
 import struct HAL.FixedBitSet
 
+/// 0x7e200000
 let GPIO_BASE_ADDRESS: UInt = BASE_ADDRESS + 0x20_0000
 
 @available(macOS 26.0.0, *)
@@ -25,6 +25,7 @@ extension FixedBitSet: BitFieldProjectable {
     }
 }
 
+// TODO: Consider using offset x strides for paired values (like gpfsel)
 @RegisterBlock
 struct GPIO {
     @RegisterBlock(offset: 0x00)
@@ -62,6 +63,18 @@ struct GPIO {
     
     @RegisterBlock(offset: 0x38)
     var gplev1: Register<GPLEV1>
+    
+    @RegisterBlock(offset: 0xe4)
+    var gpio_pup_pdn_cntrl_reg0: Register<GPIO_PUP_PDN_CNTRL_REG0>
+    
+    @RegisterBlock(offset: 0xe8)
+    var gpio_pup_pdn_cntrl_reg1: Register<GPIO_PUP_PDN_CNTRL_REG1>
+    
+    @RegisterBlock(offset: 0xec)
+    var gpio_pup_pdn_cntrl_reg2: Register<GPIO_PUP_PDN_CNTRL_REG2>
+    
+    @RegisterBlock(offset: 0xf0)
+    var gpio_pup_pdn_cntrl_reg3: Register<GPIO_PUP_PDN_CNTRL_REG3>
 }
 
 @RegisterBlock
@@ -102,6 +115,18 @@ struct GPIO_26 {
     
     @RegisterBlock(offset: 0x38)
     var gplev1: Register<GPLEV1_26>
+    
+    @RegisterBlock(offset: 0xe4)
+    var gpio_pup_pdn_cntrl_reg0: Register<GPIO_PUP_PDN_CNTRL_REG0>
+    
+    @RegisterBlock(offset: 0xe8)
+    var gpio_pup_pdn_cntrl_reg1: Register<GPIO_PUP_PDN_CNTRL_REG1>
+    
+    @RegisterBlock(offset: 0xec)
+    var gpio_pup_pdn_cntrl_reg2: Register<GPIO_PUP_PDN_CNTRL_REG2>
+    
+    @RegisterBlock(offset: 0xf0)
+    var gpio_pup_pdn_cntrl_reg3: Register<GPIO_PUP_PDN_CNTRL_REG3>
 }
 
 @Register(bitWidth: 32)
@@ -871,6 +896,7 @@ struct GPLEV1 {
     var lev57: LEV57
 }
 
+
 @Register(bitWidth: 32)
 @available(macOS 26.0.0, *)
 struct GPLEV1_26 {
@@ -879,7 +905,194 @@ struct GPLEV1_26 {
 }
 
 
+@Register(bitWidth: 32)
+struct GPIO_PUP_PDN_CNTRL_REG0 {
+    @ReadWrite(bits: 0..<2)
+    var gpio_pup_pdn_cntrl_reg00: GPIO_PUP_PDN_CNTRL_REG00
+
+    @ReadWrite(bits: 2..<4)
+    var gpio_pup_pdn_cntrl_reg01: GPIO_PUP_PDN_CNTRL_REG01
+
+    @ReadWrite(bits: 4..<6)
+    var gpio_pup_pdn_cntrl_reg02: GPIO_PUP_PDN_CNTRL_REG02
+
+    @ReadWrite(bits: 6..<8)
+    var gpio_pup_pdn_cntrl_reg03: GPIO_PUP_PDN_CNTRL_REG03
+
+    @ReadWrite(bits: 8..<10)
+    var gpio_pup_pdn_cntrl_reg04: GPIO_PUP_PDN_CNTRL_REG04
+
+    @ReadWrite(bits: 10..<12)
+    var gpio_pup_pdn_cntrl_reg05: GPIO_PUP_PDN_CNTRL_REG05
+
+    @ReadWrite(bits: 12..<14)
+    var gpio_pup_pdn_cntrl_reg06: GPIO_PUP_PDN_CNTRL_REG06
+
+    @ReadWrite(bits: 14..<16)
+    var gpio_pup_pdn_cntrl_reg07: GPIO_PUP_PDN_CNTRL_REG07
+
+    @ReadWrite(bits: 16..<18)
+    var gpio_pup_pdn_cntrl_reg08: GPIO_PUP_PDN_CNTRL_REG08
+
+    @ReadWrite(bits: 18..<20)
+    var gpio_pup_pdn_cntrl_reg09: GPIO_PUP_PDN_CNTRL_REG09
+
+    @ReadWrite(bits: 20..<22)
+    var gpio_pup_pdn_cntrl_reg0A: GPIO_PUP_PDN_CNTRL_REG0A
+
+    @ReadWrite(bits: 22..<24)
+    var gpio_pup_pdn_cntrl_reg0B: GPIO_PUP_PDN_CNTRL_REG0B
+
+    @ReadWrite(bits: 24..<26)
+    var gpio_pup_pdn_cntrl_reg0C: GPIO_PUP_PDN_CNTRL_REG0C
+
+    @ReadWrite(bits: 26..<28)
+    var gpio_pup_pdn_cntrl_reg0D: GPIO_PUP_PDN_CNTRL_REG0D
+
+    @ReadWrite(bits: 28..<30)
+    var gpio_pup_pdn_cntrl_reg0E: GPIO_PUP_PDN_CNTRL_REG0E
+
+    @ReadWrite(bits: 30..<32)
+    var gpio_pup_pdn_cntrl_reg0F: GPIO_PUP_PDN_CNTRL_REG0F
+}
+
+@Register(bitWidth: 32)
+struct GPIO_PUP_PDN_CNTRL_REG1 {
+    @ReadWrite(bits: 0..<2)
+    var gpio_pup_pdn_cntrl_reg10: GPIO_PUP_PDN_CNTRL_REG10
+
+    @ReadWrite(bits: 2..<4)
+    var gpio_pup_pdn_cntrl_reg11: GPIO_PUP_PDN_CNTRL_REG11
+
+    @ReadWrite(bits: 4..<6)
+    var gpio_pup_pdn_cntrl_reg12: GPIO_PUP_PDN_CNTRL_REG12
+
+    @ReadWrite(bits: 6..<8)
+    var gpio_pup_pdn_cntrl_reg13: GPIO_PUP_PDN_CNTRL_REG13
+
+    @ReadWrite(bits: 8..<10)
+    var gpio_pup_pdn_cntrl_reg14: GPIO_PUP_PDN_CNTRL_REG14
+
+    @ReadWrite(bits: 10..<12)
+    var gpio_pup_pdn_cntrl_reg15: GPIO_PUP_PDN_CNTRL_REG15
+
+    @ReadWrite(bits: 12..<14)
+    var gpio_pup_pdn_cntrl_reg16: GPIO_PUP_PDN_CNTRL_REG16
+
+    @ReadWrite(bits: 14..<16)
+    var gpio_pup_pdn_cntrl_reg17: GPIO_PUP_PDN_CNTRL_REG17
+
+    @ReadWrite(bits: 16..<18)
+    var gpio_pup_pdn_cntrl_reg18: GPIO_PUP_PDN_CNTRL_REG18
+
+    @ReadWrite(bits: 18..<20)
+    var gpio_pup_pdn_cntrl_reg19: GPIO_PUP_PDN_CNTRL_REG19
+
+    @ReadWrite(bits: 20..<22)
+    var gpio_pup_pdn_cntrl_reg1A: GPIO_PUP_PDN_CNTRL_REG1A
+
+    @ReadWrite(bits: 22..<24)
+    var gpio_pup_pdn_cntrl_reg1B: GPIO_PUP_PDN_CNTRL_REG1B
+
+    @ReadWrite(bits: 24..<26)
+    var gpio_pup_pdn_cntrl_reg1C: GPIO_PUP_PDN_CNTRL_REG1C
+
+    @ReadWrite(bits: 26..<28)
+    var gpio_pup_pdn_cntrl_reg1D: GPIO_PUP_PDN_CNTRL_REG1D
+
+    @ReadWrite(bits: 28..<30)
+    var gpio_pup_pdn_cntrl_reg1E: GPIO_PUP_PDN_CNTRL_REG1E
+
+    @ReadWrite(bits: 30..<32)
+    var gpio_pup_pdn_cntrl_reg1F: GPIO_PUP_PDN_CNTRL_REG1F
+}
+
+@Register(bitWidth: 32)
+struct GPIO_PUP_PDN_CNTRL_REG2 {
+    @ReadWrite(bits: 0..<2)
+    var gpio_pup_pdn_cntrl_reg20: GPIO_PUP_PDN_CNTRL_REG20
+
+    @ReadWrite(bits: 2..<4)
+    var gpio_pup_pdn_cntrl_reg21: GPIO_PUP_PDN_CNTRL_REG21
+
+    @ReadWrite(bits: 4..<6)
+    var gpio_pup_pdn_cntrl_reg22: GPIO_PUP_PDN_CNTRL_REG22
+
+    @ReadWrite(bits: 6..<8)
+    var gpio_pup_pdn_cntrl_reg23: GPIO_PUP_PDN_CNTRL_REG23
+
+    @ReadWrite(bits: 8..<10)
+    var gpio_pup_pdn_cntrl_reg24: GPIO_PUP_PDN_CNTRL_REG24
+
+    @ReadWrite(bits: 10..<12)
+    var gpio_pup_pdn_cntrl_reg25: GPIO_PUP_PDN_CNTRL_REG25
+
+    @ReadWrite(bits: 12..<14)
+    var gpio_pup_pdn_cntrl_reg26: GPIO_PUP_PDN_CNTRL_REG26
+
+    @ReadWrite(bits: 14..<16)
+    var gpio_pup_pdn_cntrl_reg27: GPIO_PUP_PDN_CNTRL_REG27
+
+    @ReadWrite(bits: 16..<18)
+    var gpio_pup_pdn_cntrl_reg28: GPIO_PUP_PDN_CNTRL_REG28
+
+    @ReadWrite(bits: 18..<20)
+    var gpio_pup_pdn_cntrl_reg29: GPIO_PUP_PDN_CNTRL_REG29
+
+    @ReadWrite(bits: 20..<22)
+    var gpio_pup_pdn_cntrl_reg2A: GPIO_PUP_PDN_CNTRL_REG2A
+
+    @ReadWrite(bits: 22..<24)
+    var gpio_pup_pdn_cntrl_reg2B: GPIO_PUP_PDN_CNTRL_REG2B
+
+    @ReadWrite(bits: 24..<26)
+    var gpio_pup_pdn_cntrl_reg2C: GPIO_PUP_PDN_CNTRL_REG2C
+
+    @ReadWrite(bits: 26..<28)
+    var gpio_pup_pdn_cntrl_reg2D: GPIO_PUP_PDN_CNTRL_REG2D
+
+    @ReadWrite(bits: 28..<30)
+    var gpio_pup_pdn_cntrl_reg2E: GPIO_PUP_PDN_CNTRL_REG2E
+
+    @ReadWrite(bits: 30..<32)
+    var gpio_pup_pdn_cntrl_reg2F: GPIO_PUP_PDN_CNTRL_REG2F
+}
+
+@Register(bitWidth: 32)
+struct GPIO_PUP_PDN_CNTRL_REG3 {
+    @ReadWrite(bits: 0..<2)
+    var gpio_pup_pdn_cntrl_reg30: GPIO_PUP_PDN_CNTRL_REG30
+
+    @ReadWrite(bits: 2..<4)
+    var gpio_pup_pdn_cntrl_reg31: GPIO_PUP_PDN_CNTRL_REG31
+
+    @ReadWrite(bits: 4..<6)
+    var gpio_pup_pdn_cntrl_reg32: GPIO_PUP_PDN_CNTRL_REG32
+
+    @ReadWrite(bits: 6..<8)
+    var gpio_pup_pdn_cntrl_reg33: GPIO_PUP_PDN_CNTRL_REG33
+
+    @ReadWrite(bits: 8..<10)
+    var gpio_pup_pdn_cntrl_reg34: GPIO_PUP_PDN_CNTRL_REG34
+
+    @ReadWrite(bits: 10..<12)
+    var gpio_pup_pdn_cntrl_reg35: GPIO_PUP_PDN_CNTRL_REG35
+
+    @ReadWrite(bits: 12..<14)
+    var gpio_pup_pdn_cntrl_reg36: GPIO_PUP_PDN_CNTRL_REG36
+
+    @ReadWrite(bits: 14..<16)
+    var gpio_pup_pdn_cntrl_reg37: GPIO_PUP_PDN_CNTRL_REG37
+
+    @ReadWrite(bits: 16..<18)
+    var gpio_pup_pdn_cntrl_reg38: GPIO_PUP_PDN_CNTRL_REG38
+
+    @ReadWrite(bits: 18..<20)
+    var gpio_pup_pdn_cntrl_reg39: GPIO_PUP_PDN_CNTRL_REG39
+}
+
 let gpio = GPIO(unsafeAddress: GPIO_BASE_ADDRESS)
 
 @available(macOS 26.0.0, *)
 let gpio_26 = GPIO_26(unsafeAddress: GPIO_BASE_ADDRESS)
+

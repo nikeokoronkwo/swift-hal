@@ -7,7 +7,12 @@
 
 import HAL
 
-class RaspberryPi4BHAL: HAL, IOCapable {
+class RaspberryPi4BHAL: HAL {
+    
+}
+
+// MARK: Raspberry Pi 4B IO Capabilities
+extension RaspberryPi4BHAL: IOCapable {
     func read(at: UInt) throws -> Bool {
         // assert this is GPLEV address
         guard at <= 57 else {
@@ -43,8 +48,58 @@ class RaspberryPi4BHAL: HAL, IOCapable {
         }
     }
     
+    func readAll(at: [UInt]) throws -> [UInt : Bool] {
+        guard at.allSatisfy({ v in
+            return v <= 57
+        }) else {
+            throw HALError.unknown("There is at least one invalid address provided")
+        }
+        
+        if #available(macOS 26.0.0, *) {
+            return try performBitSetLev(at: at)
+        } else {
+            var output: [UInt: Bool] = [:]
+            for addr in at {
+                output[addr] = try performExhaustiveRead(at: addr)
+            }
+            return output
+        }
+    }
+    
+    func writeAll(map: [UInt : Bool]) throws {
+        guard map.keys.allSatisfy({ v in
+            return v <= 57
+        }) else {
+            throw HALError.unknown("There is at least one invalid address provided")
+        }
+        
+        if #available(macOS 26.0.0, *) {
+            var sets: [UInt] = []
+            var clrs: [UInt] = []
+            
+            for (addr, value) in map {
+                if value {
+                    sets.append(addr)
+                } else {
+                    clrs.append(addr)
+                }
+            }
+            
+            performBitSetSet(at: sets)
+            performBitSetClr(at: clrs)
+        } else {
+            map.forEach { (key: UInt, value: Bool) in
+                if value {
+                    performExhaustiveSet(at: key)
+                } else {
+                    performExhaustiveClear(at: key)
+                }
+            }
+        }
+    }
+    
 
-    func configure(at: UInt, mode: Pin.Mode) throws {
+    func configure(at: UInt, mode: PinMode, pull: PinPullState) throws {
         // assert this is GPFSEL address
         guard at <= 57 else {
             throw HALError.unknownAddress("The given value is an invalid GPIO pin address", addr: at)
@@ -60,6 +115,7 @@ class RaspberryPi4BHAL: HAL, IOCapable {
             throw HALError.unsupported("Raspberry Pi 4B does not support both IO")
         }
         
+        // configure pin state
         switch at / 10 {
         case 0:
             gpio.gpfsel0.write { writer in
@@ -216,6 +272,104 @@ class RaspberryPi4BHAL: HAL, IOCapable {
         default:
             throw HALError.unknown("We should handle new address at this point, but it isn't")
         }
+        
+        // configure internal resistor pull
+        var rawPull: UInt32
+        switch pull {
+        case .none:
+            rawPull = 0b00
+        case .pullUp:
+            rawPull = 0b01
+        case .pullDown:
+            rawPull = 0b10
+        }
+        
+        switch at / 16 {
+        case 0:
+            gpio.gpio_pup_pdn_cntrl_reg0.write { writer in
+                switch at {
+                case 0:  writer.raw.gpio_pup_pdn_cntrl_reg00 = rawPull
+                case 1:  writer.raw.gpio_pup_pdn_cntrl_reg01 = rawPull
+                case 2:  writer.raw.gpio_pup_pdn_cntrl_reg02 = rawPull
+                case 3:  writer.raw.gpio_pup_pdn_cntrl_reg03 = rawPull
+                case 4:  writer.raw.gpio_pup_pdn_cntrl_reg04 = rawPull
+                case 5:  writer.raw.gpio_pup_pdn_cntrl_reg05 = rawPull
+                case 6:  writer.raw.gpio_pup_pdn_cntrl_reg06 = rawPull
+                case 7:  writer.raw.gpio_pup_pdn_cntrl_reg07 = rawPull
+                case 8:  writer.raw.gpio_pup_pdn_cntrl_reg08 = rawPull
+                case 9:  writer.raw.gpio_pup_pdn_cntrl_reg09 = rawPull
+                case 10: writer.raw.gpio_pup_pdn_cntrl_reg0A = rawPull
+                case 11: writer.raw.gpio_pup_pdn_cntrl_reg0B = rawPull
+                case 12: writer.raw.gpio_pup_pdn_cntrl_reg0C = rawPull
+                case 13: writer.raw.gpio_pup_pdn_cntrl_reg0D = rawPull
+                case 14: writer.raw.gpio_pup_pdn_cntrl_reg0E = rawPull
+                case 15: writer.raw.gpio_pup_pdn_cntrl_reg0F = rawPull
+                default: break
+                }
+            }
+        case 1:
+            gpio.gpio_pup_pdn_cntrl_reg1.write { writer in
+                switch at {
+                case 16: writer.raw.gpio_pup_pdn_cntrl_reg10 = rawPull
+                case 17: writer.raw.gpio_pup_pdn_cntrl_reg11 = rawPull
+                case 18: writer.raw.gpio_pup_pdn_cntrl_reg12 = rawPull
+                case 19: writer.raw.gpio_pup_pdn_cntrl_reg13 = rawPull
+                case 20: writer.raw.gpio_pup_pdn_cntrl_reg14 = rawPull
+                case 21: writer.raw.gpio_pup_pdn_cntrl_reg15 = rawPull
+                case 22: writer.raw.gpio_pup_pdn_cntrl_reg16 = rawPull
+                case 23: writer.raw.gpio_pup_pdn_cntrl_reg17 = rawPull
+                case 24: writer.raw.gpio_pup_pdn_cntrl_reg18 = rawPull
+                case 25: writer.raw.gpio_pup_pdn_cntrl_reg19 = rawPull
+                case 26: writer.raw.gpio_pup_pdn_cntrl_reg1A = rawPull
+                case 27: writer.raw.gpio_pup_pdn_cntrl_reg1B = rawPull
+                case 28: writer.raw.gpio_pup_pdn_cntrl_reg1C = rawPull
+                case 29: writer.raw.gpio_pup_pdn_cntrl_reg1D = rawPull
+                case 30: writer.raw.gpio_pup_pdn_cntrl_reg1E = rawPull
+                case 31: writer.raw.gpio_pup_pdn_cntrl_reg1F = rawPull
+                default: break
+                }
+            }
+        case 2:
+            gpio.gpio_pup_pdn_cntrl_reg2.write { writer in
+                switch at {
+                case 32: writer.raw.gpio_pup_pdn_cntrl_reg20 = rawPull
+                case 33: writer.raw.gpio_pup_pdn_cntrl_reg21 = rawPull
+                case 34: writer.raw.gpio_pup_pdn_cntrl_reg22 = rawPull
+                case 35: writer.raw.gpio_pup_pdn_cntrl_reg23 = rawPull
+                case 36: writer.raw.gpio_pup_pdn_cntrl_reg24 = rawPull
+                case 37: writer.raw.gpio_pup_pdn_cntrl_reg25 = rawPull
+                case 38: writer.raw.gpio_pup_pdn_cntrl_reg26 = rawPull
+                case 39: writer.raw.gpio_pup_pdn_cntrl_reg27 = rawPull
+                case 40: writer.raw.gpio_pup_pdn_cntrl_reg28 = rawPull
+                case 41: writer.raw.gpio_pup_pdn_cntrl_reg29 = rawPull
+                case 42: writer.raw.gpio_pup_pdn_cntrl_reg2A = rawPull
+                case 43: writer.raw.gpio_pup_pdn_cntrl_reg2B = rawPull
+                case 44: writer.raw.gpio_pup_pdn_cntrl_reg2C = rawPull
+                case 45: writer.raw.gpio_pup_pdn_cntrl_reg2D = rawPull
+                case 46: writer.raw.gpio_pup_pdn_cntrl_reg2E = rawPull
+                case 47: writer.raw.gpio_pup_pdn_cntrl_reg2F = rawPull
+                default: break
+                }
+            }
+        case 3:
+            gpio.gpio_pup_pdn_cntrl_reg3.write { writer in
+                switch at {
+                case 48: writer.raw.gpio_pup_pdn_cntrl_reg30 = rawPull
+                case 49: writer.raw.gpio_pup_pdn_cntrl_reg31 = rawPull
+                case 50: writer.raw.gpio_pup_pdn_cntrl_reg32 = rawPull
+                case 51: writer.raw.gpio_pup_pdn_cntrl_reg33 = rawPull
+                case 52: writer.raw.gpio_pup_pdn_cntrl_reg34 = rawPull
+                case 53: writer.raw.gpio_pup_pdn_cntrl_reg35 = rawPull
+                case 54: writer.raw.gpio_pup_pdn_cntrl_reg36 = rawPull
+                case 55: writer.raw.gpio_pup_pdn_cntrl_reg37 = rawPull
+                case 56: writer.raw.gpio_pup_pdn_cntrl_reg38 = rawPull
+                case 57: writer.raw.gpio_pup_pdn_cntrl_reg39 = rawPull
+                default: break
+                }
+            }
+        default:
+            break
+        }
     }
     
     func resetIO(at: UInt) throws {
@@ -223,6 +377,26 @@ class RaspberryPi4BHAL: HAL, IOCapable {
     }
 }
 
+// MARK: Raspberry Pi 4B Clock Capability
+extension RaspberryPi4BHAL: ClockCapable {
+    static var frequency: Float {
+        1_000_000
+    }
+    
+    func timeSinceBoot() throws -> Double {
+        var hi1, hi2: UInt32
+        var low: UInt32
+        repeat {
+            hi1 = systemTimer.chi.read().raw.cnt
+            low = systemTimer.clo.read().raw.cnt
+            hi2 = systemTimer.chi.read().raw.cnt
+        } while (hi1 != hi2);
+        
+        return Double(hi1 << 32 | low)
+    }
+}
+
+// MARK: Internal Functionality
 extension RaspberryPi4BHAL {
     /// Uses the GPIO SETn operation to perform an exhaustive set on all possible pins
     private func performExhaustiveSet(at: UInt) {
@@ -474,6 +648,35 @@ extension RaspberryPi4BHAL {
         }
     }
     
+    private func performBitSetSet(at addresses: [UInt]) {
+        var below32Addr: [Int] = []
+        var geq32Addr: [Int] = []
+        
+        for address in addresses {
+            if address >= 32 {
+                geq32Addr.append(Int(address) - 32 )
+            } else {
+                below32Addr.append(Int(address))
+            }
+        }
+        
+        if !below32Addr.isEmpty {
+            gpio_26.gpset0.write { write in
+                var fixedbitset = FixedBitSet<32>()
+                try? fixedbitset.setAll(1, at: below32Addr)
+                write.set0 = fixedbitset
+            }
+        }
+        
+        if !geq32Addr.isEmpty {
+            gpio_26.gpset1.write { write in
+                var fixedbitset = FixedBitSet<26>()
+                try? fixedbitset.setAll(1, at: geq32Addr)
+                write.set1 = fixedbitset
+            }
+        }
+    }
+    
     private func performBitSetClr(at: UInt) {
         if at >= 32 {
             gpio_26.gpclr1.write { write in
@@ -490,6 +693,35 @@ extension RaspberryPi4BHAL {
         }
     }
     
+    private func performBitSetClr(at addresses: [UInt]) {
+        var below32Addr: [Int] = []
+        var geq32Addr: [Int] = []
+        
+        for address in addresses {
+            if address >= 32 {
+                geq32Addr.append(Int(address) - 32 )
+            } else {
+                below32Addr.append(Int(address))
+            }
+        }
+        
+        if !below32Addr.isEmpty {
+            gpio_26.gpclr0.write { write in
+                var fixedbitset = FixedBitSet<32>()
+                try? fixedbitset.setAll(1, at: below32Addr)
+                write.clr0 = fixedbitset
+            }
+        }
+        
+        if !geq32Addr.isEmpty {
+            gpio_26.gpclr1.write { write in
+                var fixedbitset = FixedBitSet<26>()
+                try? fixedbitset.setAll(1, at: geq32Addr)
+                write.clr1 = fixedbitset
+            }
+        }
+    }
+    
     private func performBitSetLev(at: UInt) throws -> Bool {
         if at >= 32 {
             let value = gpio_26.gplev1.read()
@@ -498,6 +730,18 @@ extension RaspberryPi4BHAL {
             let value = gpio_26.gplev0.read()
             return try value.lev0.get(Int(at)) != 0
         }
+    }
+    
+    private func performBitSetLev(at addresses: [UInt]) throws -> [UInt: Bool] {
+        return Dictionary(uniqueKeysWithValues: try addresses.map { addr in
+            if addr >= 32 {
+                let value = gpio_26.gplev1.read().lev1
+                return (addr, try value.get(Int(addr) - 32) != 0)
+            } else {
+                let value = gpio_26.gplev0.read().lev0
+                return (addr, try value.get(Int(addr)) != 0)
+            }
+        })
     }
 }
 
